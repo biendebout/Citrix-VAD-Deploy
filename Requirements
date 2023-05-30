@@ -1,0 +1,14 @@
+4 serveurs pour citrix
+Prerequis :
+ADDS
+WMS
+Radius
+PKI
+
+1 storefront
+1 delivery controller
+1 sql
+1 licence
+(1 admin)
+
+Citrix vda pour les clients
