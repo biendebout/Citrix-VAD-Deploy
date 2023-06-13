@@ -1,0 +1,11 @@
+#!/bin/bash
+export TF_STATE=./terraform
+cd terraform
+terraform apply --auto-approve --var-file="lab.tfvars"
+# echo "sleep"
+# sleep 60s
+cd ..
+# Sync
+ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playbook.yml -e @./ansible/vars.yml -vvv
+# If you prefer to run most of the tasks async (can increase resources)
+# ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playbook-async.yml -e @./ansible/vars.yml

@@ -1,0 +1,36 @@
+ansible_connection: winrm
+ansible_winrm_transport: credssp
+
+#Domain account to connect VIA winrm. (Must be domain account with admin permissions)
+ansible_user: biendebout.ad\Administrateur
+ansible_password: 01658B6c51
+
+ansible_winrm_server_cert_validation: ignore
+ansible_port: 5986
+ansible_become: false
+
+#Media locations (do not include trailing \)
+citrix_path: \\w16-adds-01\ISO\Citrix_Virtual_Apps_and_Desktops_7_2305
+sql_path: \\w16-adds-01\ISO\Citrix_Virtual_Apps_and_Desktops_7_2305\Support\SQLExpress
+sqlms_path: \\w16-adds-01\ISO
+
+#Admin Group to add to CVAD site
+AdminGroup: biendebout\Admins du domaine
+
+#Storefront URL
+HostbaseUrl: http://mycitrixlab.lab.local
+
+#Netscaler Gateway URL
+# GatewayUrl: https://mycitrix.ryancbutler.com
+
+#SQL service account
+sql_svc_account: biendebout.ad\sql_svc
+sql_svc_password: 01658B6c51@
+
+#SQL Admins
+sql_admins: biendebout.ad\admins du domaine
+
+#Apply Windows Updates
+apply_win_updates: false
+
+

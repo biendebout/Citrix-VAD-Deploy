@@ -1,92 +1,130 @@
-# Citrix
+# Citrix Virtual Apps and Desktop vCenter Lab Deploy
+Uses Terraform and Ansible to deploy a fully functional CVAD environment. Many of the scripts used are thanks to [Dennis Span](https://dennisspan.com) and his fantastic blog.
 
+## What it does
 
+Deploys the following:
+ - 2 DDC Controllers with Director
+ - 2 Storefront Servers (Cluster)
+ - 1 SQL and License Server
+ - 1 Stand alone VDA
 
-## Getting started
+### DDC
+ - Installs components including director
+ - Creates Citrix site
+ - Creates 1 Machine Catalog
+ - Creates 1 Delivery Group
+ - Creates 1 Published Desktop
+ - Creates 3 Applications
+    - Notepad
+    - Calculator
+    - Paint
+ - Configures director
+    - Adds logon domain
+    - Sets default page
+    - Removes SSL Warning
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### Storefront
+ - Installs Storefront components
+ - Creates Storefront cluster
+ - Configures Storefromt
+   - Adds Citrix Gateway
+   - Sets default page
+   - Enables HTTP loopback for SSL offload
+   - Adjusts logoff behavior
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### SQL and Citrix License
+ - Installs SQL and license server
+ - Installs SQL management tools
+ - Configures SQL for admins and service account
+ - Copies Citrix license files
 
-## Add your files
+### VDA
+ - Installs VDA components
+ - Configures for DDCs
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## Prerequisites
 
+- Need CVAD ISO contents copied to accessible share via Ansible account (eg \\\mynas\isos\Citrix\Citrix_Virtual_Apps_and_Desktops_7_1906_2)
+    - I used CVAD 1906 2 ISO
+- Need SQL ISO contents copied to accessible share via Ansible account (eg \\\mynas\isos\Microsoft\SQL\en_sql_server_2017_standard_x64_dvd_11294407)
+    - I used SQL 2017 but other versions should work
+- DHCP enabled network
+- vCenter access and rights capable of deploying machines
+- (optional for remote state) [Terraform Cloud](https://app.terraform.io/signup/account) account created and API key for remote state.
+
+### Deploy machine
+I used [Ubuntu WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) to deploy from
+
+1. [Ansible installed](https://www.digitalocean.com/community/tutorials/how-to-install-and-configure-ansible-on-ubuntu-18-04)
+   - Install **pywinrm** `pip install pywinrm` and `pip install pywinrm[credssp]`
+2. [Terraform installed](https://askubuntu.com/questions/983351/how-to-install-terraform-in-ubuntu)
+3. [Terraform-Inventory](https://github.com/adammck/terraform-inventory/releases) installed in path.  This is used for the Ansible inventory
+    - I copied to */usr/bin/*
+4. (If using remote state)[Configure Access for the Terraform CLI](https://www.terraform.io/docs/cloud/free/index.html#configure-access-for-the-terraform-cli)
+5. This REPO cloned down
+
+### vCenter Windows Server Template
+    
+1. I used Windows Server 2019 but I assume 2016 should also work.
+2. WinRM needs to be configured and **CredSSP** enabled
+    - Ansible provides a great script to enable quickly https://github.com/ansible/ansible/blob/devel/examples/scripts/ConfigureRemotingForAnsible.ps1
+    - Run manually `Enable-WSManCredSSP -Role Server -Force`
+3. I use linked clones to quickly deploy.  In order for this to work the template needs to be converted to a VM with a **single snapshot** created.
+
+## Getting Started
+
+### Terraform
+1. From the *terraform* directory copy **lab.tfvars.sample** to **lab.tfvars**
+2. Adjust variables to reflect vCenter environment
+3. Review **main.tf** and adjust any VM resources if needed
+4. (If using remote cloud state) At the bottom of **main.tf** uncomment the *terraform* section and edit the *organization* and *workspaces* fields
 ```
-cd existing_repo
-git remote add origin https://developers.naval-group.com/gitlab/malik.malassis/citrix.git
-git branch -M main
-git push -uf origin main
+terraform {
+   backend "remote" {
+     organization = "TechDrabble"
+     workspaces {
+       name = "cvad-lab"
+     }
+   }
+}
+```
+5. run `terraform init` to install needed provider
+
+### Ansible
+1. From the *ansible* directory copy **vars.yml.sample** to **vars.yml**
+2. Adjust variables to reflect environment
+3. If you want to license CVAD environment place generated license file in **ansible\roles\license\files**
+
+## Deploy
+If you are comfortable with below process `build.sh` handles the below steps.  
+
+**Note:** If you prefer to run many of the tasks asynchronously switch the `ansible-playbook` lines within `build.sh` which will call a seperate playbook. This is faster but can consume more resources and less informative output.
+```
+#Sync
+#ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playbook.yml -e @./ansible/vars.yml
+#If you prefer to run most of the tasks async (can increase resources)
+ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playbook-async.yml -e @./ansible/vars.yml
 ```
 
-## Integrate with your tools
+## Terraform
+1. From the *terraform* directory run `terraform apply --var-file="lab.tfvars"`
+2. Verify the results and type `yes` to start the build
 
-- [ ] [Set up project integrations](https://developers.naval-group.com/gitlab/malik.malassis/citrix/-/settings/integrations)
+## Ansible
+1. From the *root* directory and the terraform deployment is completed run the following
+    - `export TF_STATE=./terraform` used for the inventory script
+    - Synchronous run (Serial tasks)
+        - `ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playbook.yml -e @./ansible/vars.yml` to start the playbook
+    - Asynchronous run (Parallel tasks)
+        - `ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playbook-async.yml -e @./ansible/vars.yml` to start the playbook
+    - Grab coffee
 
-## Collaborate with your team
+## Destroy
+If you are comfortable with below process `destroy.sh` handles the below steps.  **Please note this does not clean up the computer accounts**
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## Terraform
+1. From the *terraform* directory run `terraform destroy --var-file="lab.tfvars"`
+2. Verify the results and type `yes` to destroy
 
-## Test and Deploy
 
-Use the built-in continuous integration in GitLab.
-
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
