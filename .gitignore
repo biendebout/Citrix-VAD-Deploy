@@ -1,2 +1,6 @@
 .token
 .env
+vars.yml
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl

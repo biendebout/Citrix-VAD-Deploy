@@ -1,7 +1,7 @@
 # The name of your XenDesktop site. For example: "MySite".
 SiteName: BiendeboutSite
 # The name of your SQL server or SQL server instance (e.g. "SQLServer1.mycompany.com" or "SQLCTX01.mycompany.com\InStance1").
-DatabaseServer: "sql-ctx-lab-01"
+DatabaseServer: "sql-ctx-lab-01.biendebout.ad"
 # The SQL port number (1433 by default)
 DatabaseServerPort: 1433
 # The name for the site database. For example: "CTX_Site_DB".
@@ -21,8 +21,8 @@ ProductEdition: PLT
 # The name of the Active Directory user or group, for example "MyDomain\CTXAdmins".
 AdminGroup: biendebout.ad\admins du domaine
 # The role to assign to the new XenDesktop administrator. The following built-in roles are available
-Role: Full Administrator
+Role: Administrateur complet #Full Administrator in English
 # The scope (the objects) to which the permissions (defined in the role) apply                      
-Scope: All
+Scope: Toutes # All if in English
 # The number of days you want to monitoring data to be saved in the database, for example 365 days.                                                    
 GroomingDays: 365

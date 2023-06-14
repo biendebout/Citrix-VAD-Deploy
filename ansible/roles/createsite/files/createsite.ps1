@@ -79,7 +79,7 @@ Function DS_WriteLog {
     }
 }
 #==========================================================================
-
+ 
 ################
 # Main section #
 ################
@@ -425,7 +425,7 @@ if ( $SiteExists ) {
     # Assign full admin rights to the admin group "CTXAdmins"
     DS_WriteLog "I" "Assign full admin rights to the Citrix administrator $AdminGroup" $LogFile
     try {  
-        Add-AdminRight -AdminAddress $ComputerName -Administrator $AdminGroup -Role 'Full Administrator' -Scope "All" | Out-Null
+        Add-AdminRight -AdminAddress $ComputerName -Administrator $AdminGroup -Role $Role -Scope $Scope | Out-Null
         DS_WriteLog "S" "Successfully assigned full admin rights to the Citrix administrator $AdminGroup" $LogFile
     } catch {
         DS_WriteLog "E" "An error occurred trying to assign full admin rights to the Citrix administrator $AdminGroup (error: $($Error[0]))" $LogFile

@@ -23,6 +23,17 @@
     creates_service: MSSQLSERVER
   register: sql_install
 
+- name: Create Firewall Rules (Port 1433)
+  win_firewall_rule:
+    name: "SQL (Created by Ansible)"
+    localport: 1433
+    action: allow
+    protocol: tcp
+    direction: in
+    state: present
+    enabled: yes
+    profiles: 'domain'
+
 - name: Reboot after SQL
   win_reboot:
   when: sql_install.changed
