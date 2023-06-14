@@ -1,3 +1,5 @@
+# CITRIX REQUIREMENTS : https://docs.citrix.com/en-us/citrix-virtual-apps-desktops/system-requirements.html
+
 provider "vsphere" {
   user           = "${var.vsphere_user}"
   password       = "${var.vsphere_password}"
@@ -44,7 +46,7 @@ resource "vsphere_virtual_machine" "ddc" {
   datastore_id     = "${data.vsphere_datastore.datastore.id}"
   folder           = "${vsphere_folder.folder.path}"
   num_cpus         = 4
-  memory           = 6092
+  memory           = 6144
   guest_id         = "${data.vsphere_virtual_machine.template.guest_id}"
   wait_for_guest_net_timeout = "0"
   scsi_type = "${data.vsphere_virtual_machine.template.scsi_type}"
@@ -90,7 +92,7 @@ resource "vsphere_virtual_machine" "storefront" {
   datastore_id     = "${data.vsphere_datastore.datastore.id}"
   folder           = "${vsphere_folder.folder.path}"
   num_cpus         = 4
-  memory           = 6092
+  memory           = 6144
   guest_id         = "${data.vsphere_virtual_machine.template.guest_id}"
   wait_for_guest_net_timeout = "0"
   scsi_type = "${data.vsphere_virtual_machine.template.scsi_type}"
@@ -135,7 +137,7 @@ resource "vsphere_virtual_machine" "sql" {
   datastore_id     = "${data.vsphere_datastore.datastore.id}"
   folder           = "${vsphere_folder.folder.path}"
   num_cpus         = 4
-  memory           = 6092
+  memory           = 6144
   guest_id         = "${data.vsphere_virtual_machine.template.guest_id}"
   wait_for_guest_net_timeout = "0"
   scsi_type = "${data.vsphere_virtual_machine.template.scsi_type}"
@@ -182,7 +184,7 @@ resource "vsphere_virtual_machine" "vda" {
   datastore_id     = "${data.vsphere_datastore.datastore.id}"
   folder           = "${vsphere_folder.folder.path}"
   num_cpus         = 4
-  memory           = 6092
+  memory           = 6144
   guest_id         = "${data.vsphere_virtual_machine.template.guest_id}"
   wait_for_guest_net_timeout = "0"
 

@@ -1,5 +1,5 @@
 # Citrix Virtual Apps and Desktop vCenter Lab Deploy
-Uses Terraform and Ansible to deploy a fully functional CVAD environment. Many of the scripts used are thanks to [Dennis Span](https://dennisspan.com) and his fantastic blog.
+Uses Terraform and Ansible to deploy a fully functional CVAD environment. Based on project [CITRIX-VAD-LAB](https://github.com/ryancbutler/Citrix-VAD-LAB).
 
 ## What it does
 
@@ -8,6 +8,7 @@ Deploys the following:
  - 2 Storefront Servers (Cluster)
  - 1 SQL and License Server
  - 1 Stand alone VDA
+ - Add them to the specified domain
 
 ### DDC
  - Installs components including director
@@ -46,12 +47,13 @@ Deploys the following:
 ## Prerequisites
 
 - Need CVAD ISO contents copied to accessible share via Ansible account (eg \\\mynas\isos\Citrix\Citrix_Virtual_Apps_and_Desktops_7_1906_2)
-    - I used CVAD 1906 2 ISO
-- Need SQL ISO contents copied to accessible share via Ansible account (eg \\\mynas\isos\Microsoft\SQL\en_sql_server_2017_standard_x64_dvd_11294407)
-    - I used SQL 2017 but other versions should work
-- DHCP enabled network
+    - I used CVAD 7 2305 ISO
+- SQL Express 2019 from the CVAD ISO is installed by default. If you want another version, need SQL ISO contents copied to accessible share via Ansible account (eg \\\mynas\isos\Microsoft\SQL\en_sql_server_2017_standard_x64_dvd_11294407). Don't forget to change the $sql_path in [vars.yml](ansible/vars.yml)
+    - I used SQL Express 2019
+- Need SSMS setup copied to accessible share via Ansible account (eg \\\mynas\exe\SSMS-Setup-ENU.exe)
+- For offline feature installation, need the "microsoft-windows-netfx3-ondemand-package.cab" (you'll find it in sxs folder of your Windows Server ISO) copied to accessible share via Ansible account (eg \\mynas\isos\Microsoft\sxs\microsoft-windows-netfx3-ondemand-package.cab)
+- DHCP enabled network (with DNS pointing at your ADDS server)
 - vCenter access and rights capable of deploying machines
-- (optional for remote state) [Terraform Cloud](https://app.terraform.io/signup/account) account created and API key for remote state.
 
 ### Deploy machine
 I used [Ubuntu WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) to deploy from
@@ -66,18 +68,19 @@ I used [Ubuntu WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) 
 
 ### vCenter Windows Server Template
     
-1. I used Windows Server 2019 but I assume 2016 should also work.
+1. I used Windows Server 2016 but I assume 2019 should also work.
 2. WinRM needs to be configured and **CredSSP** enabled
     - Ansible provides a great script to enable quickly https://github.com/ansible/ansible/blob/devel/examples/scripts/ConfigureRemotingForAnsible.ps1
     - Run manually `Enable-WSManCredSSP -Role Server -Force`
-3. I use linked clones to quickly deploy.  In order for this to work the template needs to be converted to a VM with a **single snapshot** created.
+3. Need .NET Framework 4.7.2 installed
+4. I use linked clones to quickly deploy.  In order for this to work the template needs to be converted to a VM with a **single snapshot** created.
 
 ## Getting Started
 
 ### Terraform
 1. From the *terraform* directory copy **lab.tfvars.sample** to **lab.tfvars**
 2. Adjust variables to reflect vCenter environment
-3. Review **main.tf** and adjust any VM resources if needed
+3. Review **main.tf** and adjust any VM resources if needed (https://docs.citrix.com/en-us/citrix-virtual-apps-desktops/system-requirements.html)
 4. (If using remote cloud state) At the bottom of **main.tf** uncomment the *terraform* section and edit the *organization* and *workspaces* fields
 ```
 terraform {
@@ -107,11 +110,11 @@ If you are comfortable with below process `build.sh` handles the below steps.
 ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playbook-async.yml -e @./ansible/vars.yml
 ```
 
-## Terraform
+### Terraform
 1. From the *terraform* directory run `terraform apply --var-file="lab.tfvars"`
 2. Verify the results and type `yes` to start the build
 
-## Ansible
+### Ansible
 1. From the *root* directory and the terraform deployment is completed run the following
     - `export TF_STATE=./terraform` used for the inventory script
     - Synchronous run (Serial tasks)
@@ -123,8 +126,6 @@ ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playboo
 ## Destroy
 If you are comfortable with below process `destroy.sh` handles the below steps.  **Please note this does not clean up the computer accounts**
 
-## Terraform
+### Terraform
 1. From the *terraform* directory run `terraform destroy --var-file="lab.tfvars"`
 2. Verify the results and type `yes` to destroy
-
-

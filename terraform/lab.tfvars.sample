@@ -5,8 +5,8 @@ vsphere_user       = "myadmin@mydomain.local"
 vsphere_password   = "supersecret"
 vsphere_datacenter = "mydatacenter"
 vsphere_datastore  = "mydatastore"
-#Resource Pool (If no resource pool place in CLUSTER/Resources format)
-vsphere_rp           = "LAB-CLUSTER/Resources"
+#Name of the Resource Pool (If no resource pool place in CLUSTER/Resources format)
+vsphere_rp           = "LAB-CLUSTER/RP1" #or RP1 if no cluster
 vsphere_template     = "Win2019Datacenter_Template_GUI"
 #DHCP Network
 vsphere_network      = "VLAN2"
@@ -21,10 +21,10 @@ vm_storefront = "sf-ctx-lab-0"
 vm_ddc        = "ddc-ctx-lab-0"
 vm_vda        = "vda-ctx-lab-0"
 #Actual Name
-vm_sql = "sql-ctx-lab-01"
+vm_sql        = "sql-ctx-lab-01"
 
 
 #Join domain
-domain_user     = "mydomainadmin"
+domain_user     = "mydomainadmin@mydomain.local"
 domain_password = "supersecret"
 domain          = "mydomain.local"
