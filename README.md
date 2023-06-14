@@ -109,7 +109,7 @@ If you are comfortable with below process `build.sh` handles the below steps.
 #ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playbook.yml -e @./ansible/vars.yml
 #If you prefer to run most of the tasks async (can increase resources)
 ansible-playbook --inventory-file=/usr/bin/terraform-inventory ./ansible/playbook-async.yml -e @./ansible/vars.yml
-```
+``` POUET
 
 ### Terraform
 1. From the *terraform* directory run `terraform apply --var-file="lab.tfvars"`
