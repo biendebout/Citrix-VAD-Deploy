@@ -95,10 +95,10 @@ terraform {
 5. run `terraform init` to install needed provider
 
 ### Ansible
-1. From the *ansible* directory copy **vars.yml.sample** to **vars.yml**
+1. From the [ansible](ansible/) directory copy **vars.yml.sample** to **vars.yml**
 2. Adjust variables to reflect environment
 3. If you want to license CVAD environment place generated license file in **ansible\roles\license\files**
-4. Adjust variables in **main.yml** of **site-hydrate** and **createsite role**
+4. Adjust variables in **main.yml** of **site-hydrate** and **createsite** role
 
 ## Deploy
 If you are comfortable with below process `build.sh` handles the below steps.  
