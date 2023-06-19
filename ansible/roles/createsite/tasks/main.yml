@@ -1,4 +1,8 @@
 ---
+  # - name: Debug vars
+  #   ansible.builtin.debug:
+  #     msg: "{{ hostvars }}"
+
   - name: Create or Join Site
     script: files/createsite.ps1
     args:

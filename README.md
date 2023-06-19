@@ -1,4 +1,4 @@
-# Citrix Virtual Apps and Desktop vCenter Lab Deploy
+# Citrix Virtual Apps and Desktop vCenter Deploy
 Uses Terraform and Ansible to deploy a fully functional CVAD environment. Based on project [CITRIX-VAD-LAB](https://github.com/ryancbutler/Citrix-VAD-LAB).
 
 ## What it does
